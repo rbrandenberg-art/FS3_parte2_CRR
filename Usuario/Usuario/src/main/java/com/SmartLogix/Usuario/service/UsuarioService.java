@@ -6,16 +6,22 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.SmartLogix.Usuario.model.Usuario;
+import com.SmartLogix.Usuario.model.UsuarioRegistroEvent;
 import com.SmartLogix.Usuario.repository.UsuarioRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+    
     public List<Usuario> obtenerTodos() {
         return usuarioRepository.findAll();
     }
@@ -30,10 +36,16 @@ public class UsuarioService {
 
     public Usuario registrar(Usuario usuario) {
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new IllegalArgumentException("El email ya está registrado: " + usuario.getEmail());
+            throw new IllegalArgumentException("El email ya está registrado");
         }
-        // En producción: hashear el password antes de guardar
-        return usuarioRepository.save(usuario);
+        
+        Usuario guardado = usuarioRepository.save(usuario);
+
+        
+        // Se publica el evento para que cualquier interesado reaccione
+        eventPublisher.publishEvent(new UsuarioRegistroEvent(this, guardado.getEmail()));
+
+        return guardado;
     }
 
     public Optional<Usuario> actualizar(Long id, Usuario datosActualizados) {
