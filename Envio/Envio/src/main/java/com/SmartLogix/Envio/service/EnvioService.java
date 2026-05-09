@@ -7,10 +7,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.SmartLogix.Envio.core.CalculadorLogistico;
 import com.SmartLogix.Envio.model.Envio;
 import com.SmartLogix.Envio.model.EstadoEnvio;
 import com.SmartLogix.Envio.repository.EnvioRepository;
-
+import com.SmartLogix.Envio.core.CalculadorLogistico; 
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class EnvioService {
 
     private final EnvioRepository envioRepository;
+    private final List<CalculadorLogistico> modalidadesDespacho;
 
     public List<Envio> obtenerTodos() {
         return envioRepository.findAll();
@@ -35,9 +37,19 @@ public class EnvioService {
         return envioRepository.findByNumeroSeguimiento(numeroSeguimiento);
     }
 
-    public Envio crear(Envio envio) {
+    public Envio crear(Envio envio, String tipoLogistica) {
         envio.setNumeroSeguimiento(generarNumeroSeguimiento());
-        envio.setFechaEstimadaEntrega(LocalDateTime.now().plusDays(5));
+
+        // 1. Buscamos la estrategia que coincida con el tipo solicitado
+        CalculadorLogistico estrategia = modalidadesDespacho.stream()
+            .filter(m -> m.obtenerIdentificador().equalsIgnoreCase(tipoLogistica))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("La modalidad de despacho '" + tipoLogistica + "' no existe."));
+
+        // 2. Ejecutamos la lógica de la estrategia (esto reemplaza el plusDays(5))
+        estrategia.procesarPlazos(envio);
+
+        // 3. Guardamos
         return envioRepository.save(envio);
     }
 

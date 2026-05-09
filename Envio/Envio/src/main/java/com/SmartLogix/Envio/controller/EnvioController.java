@@ -53,9 +53,9 @@ public class EnvioController {
     }
 
     @PostMapping
-    public ResponseEntity<Envio> crear(@RequestBody Envio envio) {
+    public ResponseEntity<Envio> crear(@RequestBody Envio envio, @RequestParam String tipo) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(envioService.crear(envio));
+                .body(envioService.crear(envio, tipo));
     }
 
     @PatchMapping("/{id}/estado")
