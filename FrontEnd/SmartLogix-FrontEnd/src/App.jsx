@@ -1,14 +1,35 @@
 // src/App.jsx
-import InventarioList from './components/InventarioList';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Topbar from './components/Topbar';
+import Dashboard from './pages/Dashboard';
+import Inventario from './pages/Inventario';
+import Pedidos from './pages/Pedidos';
+import Envios from './pages/Envios';
+import Usuario from './pages/Usuario';
 
 function App() {
   return (
-    <div className="App">
-      <nav className="bg-blue-900 text-white p-4 shadow-lg">
-        <div className="container mx-auto font-bold text-xl">SmartLogix System</div>
-      </nav>
-      <InventarioList />
-    </div>
+    <BrowserRouter>
+      <div className="app-wrap">
+        <div className="app">
+          <Sidebar />
+          <div className="main">
+            <Topbar />
+            <div className="content">
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/inventario" element={<Inventario />} />
+                <Route path="/pedidos" element={<Pedidos />} />
+                <Route path="/envios" element={<Envios />} />
+                <Route path="/usuario" element={<Usuario />} />
+              </Routes>
+            </div>
+          </div>
+        </div>
+      </div>
+    </BrowserRouter>
   );
 }
 
