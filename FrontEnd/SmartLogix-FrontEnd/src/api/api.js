@@ -11,24 +11,66 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Inventario
-export const getInventario = () => api.get('/inventario/model');
-export const getProductoById = (id) => api.get(`/inventario/model/${id}`);
-export const crearProducto = (data) => api.post('/inventario/model', data);
-export const actualizarProducto = (id, data) => api.put(`/inventario/model/${id}`, data);
-export const eliminarProducto = (id) => api.delete(`/inventario/model/${id}`);
+// ==========================================
+// MICROSERVICIO: INVENTARIO
+// ==========================================
+const INVENTARIO_URL = '/api/inventario/inventario';
 
-// Usuario
-export const loginUsuario = (data) => api.post('/usuario/login', data);
-export const registrarUsuario = (data) => api.post('/usuario/register', data);
-export const getUsuarioActual = () => api.get('/usuario/me');
+export const getInventario = () => api.get(INVENTARIO_URL);
+export const getProductoById = (id) => api.get(`${INVENTARIO_URL}/${id}`);
+export const crearProducto = (data) => api.post(INVENTARIO_URL, data);
+export const actualizarProducto = (id, data) => api.put(`${INVENTARIO_URL}/${id}`, data);
+export const eliminarProducto = (id) => api.delete(`${INVENTARIO_URL}/${id}`);
 
-// Pedido
-export const crearPedido = (data) => api.post('/pedido/model', data);
-export const getPedidos = () => api.get('/pedido/model');
-export const getPedidoById = (id) => api.get(`/pedido/model/${id}`);
+// Nuevos endpoints basados en tu InventarioController
+export const verificarStock = (id, cantidad) => api.get(`${INVENTARIO_URL}/${id}/stock`, { params: { cantidad } });
+export const reducirStock = (id, cantidad) => api.patch(`${INVENTARIO_URL}/${id}/reducir-stock`, null, { params: { cantidad } });
 
-// Envio
-export const getEnvioByPedido = (pedidoId) => api.get(`/envio/model/${pedidoId}`);
+// ==========================================
+// MICROSERVICIO: PEDIDO
+// ==========================================
+const PEDIDO_URL = '/api/pedidos';
 
+export const getPedidos = () => api.get(PEDIDO_URL);
+export const getPedidoById = (id) => api.get(`${PEDIDO_URL}/${id}`);
+export const crearPedido = (data) => api.post(PEDIDO_URL, data);
+
+// Nuevos endpoints basados en tu PedidoController
+export const getPedidosByUsuario = (usuarioId) => api.get(`${PEDIDO_URL}/usuario/${usuarioId}`);
+export const cambiarEstadoPedido = (id, estado) => api.patch(`${PEDIDO_URL}/${id}/estado`, null, { params: { estado } });
+export const cancelarPedido = (id) => api.patch(`${PEDIDO_URL}/${id}/cancelar`);
+
+// ==========================================
+// MICROSERVICIO: USUARIO
+// ==========================================
+const USUARIO_URL = '/api/usuarios';
+
+export const getUsuarios = () => api.get(USUARIO_URL);
+export const getUsuarioById = (id) => api.get(`${USUARIO_URL}/${id}`);
+export const getUsuarioByEmail = (email) => api.get(`${USUARIO_URL}/email/${email}`);
+export const registrarUsuario = (data) => api.post(`${USUARIO_URL}/registrar`, data);
+export const actualizarUsuario = (id, data) => api.put(`${USUARIO_URL}/${id}`, data);
+export const desactivarUsuario = (id) => api.patch(`${USUARIO_URL}/${id}/desactivar`);
+
+// Nota sobre Seguridad: Tu controlador no tiene un endpoint explícito para /login o /me. 
+// Esto es normal si usas Spring Security (UsernamePasswordAuthenticationFilter).
+// Mantengo esta ruta estándar asumiendo que tu filtro de seguridad escucha aquí:
+export const loginUsuario = (data) => api.post(`${USUARIO_URL}/login`, data);
+export const getUsuarioActual = () => api.get(`${USUARIO_URL}/me`);
+
+// ==========================================
+// MICROSERVICIO: ENVIO
+// ==========================================
+const ENVIO_URL = '/api/envios';
+
+export const getEnvios = () => api.get(ENVIO_URL);
+export const getEnvioById = (id) => api.get(`${ENVIO_URL}/${id}`);
+export const getEnvioByPedido = (pedidoId) => api.get(`${ENVIO_URL}/pedido/${pedidoId}`);
+export const rastrearEnvio = (numeroSeguimiento) => api.get(`${ENVIO_URL}/rastrear/${numeroSeguimiento}`);
+
+// Atención aquí: Axios envía el 'data' en el body, y el 'tipo' en la URL como ?tipo=EXPRES
+export const crearEnvio = (data, tipo) => api.post(ENVIO_URL, data, { params: { tipo } });
+
+// Petición PATCH con un @RequestParam
+export const cambiarEstadoEnvio = (id, estado) => api.patch(`${ENVIO_URL}/${id}/estado`, null, { params: { estado } });
 export default api;

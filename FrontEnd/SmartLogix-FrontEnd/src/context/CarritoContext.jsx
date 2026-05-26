@@ -1,9 +1,18 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const CarritoContext = createContext();
 
 export const CarritoProvider = ({ children }) => {
-    const [carrito, setCarrito] = useState([]);
+    // 1. Inicializar desde localStorage igual que el usuario
+    const [carrito, setCarrito] = useState(() => {
+        const guardado = localStorage.getItem('carrito_smartlogix');
+        return guardado ? JSON.parse(guardado) : [];
+    });
+
+    // 2. Guardar automáticamente cada vez que el carrito cambie
+    useEffect(() => {
+        localStorage.setItem('carrito_smartlogix', JSON.stringify(carrito));
+    }, [carrito]);
 
     const agregarAlCarrito = (producto) => {
         setCarrito((prev) => {

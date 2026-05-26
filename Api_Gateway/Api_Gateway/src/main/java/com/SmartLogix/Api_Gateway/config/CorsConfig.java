@@ -33,3 +33,16 @@ public class CorsConfig {
         return new CorsWebFilter(source);
     }
 }
+
+/*public class CorsConfig {
+    private static CorsConfig instancia;
+
+    private CorsConfig() {}
+
+    public static CorsConfig getInstancia() {
+        if (instancia == null) {
+            instancia = new CorsConfig();
+        }
+        return instancia;
+    }
+}*/

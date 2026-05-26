@@ -1,35 +1,13 @@
-import { useEffect, useState } from 'react';
-import { getInventario } from '../api/api';
+// src/pages/Catalogo.jsx
+import { useState } from 'react';
 import { useCarrito } from '../context/CarritoContext';
-
-const MOCK_PRODUCTOS = [
-    { id: 1, nombre: 'Laptop Pro X', descripcion: 'Laptop de alto rendimiento para profesionales', precio: 1299990, stock: 5, categoria: 'Computación' },
-    { id: 2, nombre: 'Monitor UltraWide', descripcion: 'Monitor 34" curvo para máxima productividad', precio: 599990, stock: 8, categoria: 'Periféricos' },
-    { id: 3, nombre: 'Teclado Mecánico RGB', descripcion: 'Teclado mecánico con switches Cherry MX', precio: 89990, stock: 15, categoria: 'Periféricos' },
-    { id: 4, nombre: 'Mouse Inalámbrico', descripcion: 'Mouse ergonómico con 90 días de batería', precio: 49990, stock: 20, categoria: 'Periféricos' },
-    { id: 5, nombre: 'Auriculares Noise Cancelling', descripcion: 'Sonido premium con cancelación activa de ruido', precio: 249990, stock: 3, categoria: 'Audio' },
-    { id: 6, nombre: 'Webcam 4K', descripcion: 'Cámara web 4K para videollamadas profesionales', precio: 129990, stock: 0, categoria: 'Accesorios' },
-];
+import { useCatalogo } from '../hooks/useCatalogo'; // Importamos la Fachada
 
 const Catalogo = () => {
-    const [productos, setProductos] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // 1. Consumimos los datos desde la Fachada
+    const { productos, loading } = useCatalogo(); 
     const { agregarAlCarrito } = useCarrito();
     const [agregado, setAgregado] = useState({});
-
-    useEffect(() => {
-        const fetchProductos = async () => {
-            try {
-                const res = await getInventario();
-                setProductos(res.data);
-            } catch {
-                setProductos(MOCK_PRODUCTOS);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProductos();
-    }, []);
 
     const handleAgregar = (producto) => {
         agregarAlCarrito(producto);
@@ -42,7 +20,7 @@ const Catalogo = () => {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Cargando productos...</p>
+                    <p className="text-gray-600">Cargando productos de SmartLogix...</p>
                 </div>
             </div>
         );
