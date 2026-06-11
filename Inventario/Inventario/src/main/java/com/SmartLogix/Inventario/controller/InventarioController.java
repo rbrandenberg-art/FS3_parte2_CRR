@@ -1,6 +1,7 @@
 package com.SmartLogix.Inventario.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.SmartLogix.Inventario.dto.InventarioResponseDTO;
 import com.SmartLogix.Inventario.model.Inventario;
 import com.SmartLogix.Inventario.service.InventarioService;
 
@@ -28,8 +30,22 @@ public class InventarioController {
     private final InventarioService inventarioService;
 
     @GetMapping
-    public ResponseEntity<List<Inventario>> obtenerTodos() {
-        return ResponseEntity.ok(inventarioService.obtenerTodos());
+    public ResponseEntity<List<InventarioResponseDTO>> obtenerTodos() {
+        // 1. Obtenemos la lista de entidades reales de la base de datos
+        List<Inventario> productos = inventarioService.obtenerTodos();
+        
+        // 2. Mapeamos cada objeto de la BD a la estructura plana del DTO
+        List<InventarioResponseDTO> dtoList = productos.stream()
+            .map(p -> new InventarioResponseDTO(
+                p.getId(), 
+                p.getNombre(), 
+                p.getDescripcion(), 
+                p.getPrecio(), 
+                p.getStock()
+            ))
+            .collect(Collectors.toList());
+            
+        return ResponseEntity.ok(dtoList);
     }
 
     @GetMapping("/{id}")
@@ -68,10 +84,10 @@ public class InventarioController {
 
     @PatchMapping("/{id}/reducir-stock")
     public ResponseEntity<Inventario> reducirStock(@PathVariable Long id,
-                                                  @RequestParam Integer cantidad) {
+                                                              @RequestParam Integer cantidad) {
         return inventarioService.reducirStock(id, cantidad)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build()); 
     }
 }
 

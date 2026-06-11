@@ -1,10 +1,10 @@
 // src/pages/Catalogo.jsx
 import { useState } from 'react';
 import { useCarrito } from '../context/CarritoContext';
-import { useCatalogo } from '../hooks/useCatalogo'; // Importamos la Fachada
+import { useCatalogo } from '../hooks/useCatalogo'; // Importamos la Fachada con patrón estructural
 
 const Catalogo = () => {
-    // 1. Consumimos los datos desde la Fachada
+    // 1. Consumimos los datos desde la Fachada de forma segura
     const { productos, loading } = useCatalogo(); 
     const { agregarAlCarrito } = useCarrito();
     const [agregado, setAgregado] = useState({});
@@ -42,12 +42,11 @@ const Catalogo = () => {
                         <div className="p-5">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs text-gray-400 font-mono">ID: {producto.id}</span>
-                                {producto.categoria && (
-                                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">{producto.categoria}</span>
-                                )}
+                                {/* CORRECCIÓN: Se eliminó el bloque condicional de producto.categoria ya que no forma parte del InventarioResponseDTO */}
                             </div>
                             <h2 className="text-lg font-bold text-gray-800 mt-1">{producto.nombre}</h2>
                             <p className="text-gray-500 text-sm mt-2 line-clamp-2">{producto.descripcion}</p>
+                            
                             <div className="mt-4 flex items-center justify-between">
                                 <span className="text-xl font-bold text-blue-700">
                                     ${Number(producto.precio).toLocaleString('es-CL')}
@@ -56,6 +55,7 @@ const Catalogo = () => {
                                     {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}
                                 </span>
                             </div>
+                            
                             <button
                                 onClick={() => handleAgregar(producto)}
                                 disabled={producto.stock === 0}
