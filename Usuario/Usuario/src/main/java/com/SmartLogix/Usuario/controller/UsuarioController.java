@@ -1,6 +1,7 @@
 package com.SmartLogix.Usuario.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +13,21 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+// IMPORTACIONES DE LOS DTOS NUEVOS Y VALIDACIÓN
+import com.SmartLogix.Usuario.dto.UsuarioRequestDTO;
+import com.SmartLogix.Usuario.dto.UsuarioResponseDTO;
 import com.SmartLogix.Usuario.model.Usuario;
 import com.SmartLogix.Usuario.service.UsuarioService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*") // Permite la comunicación limpia con tu aplicación en React sin problemas de CORS
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -44,13 +51,19 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * CAMBIO CONTRATO 3: Adaptado a DTO de Entrada y Salida con Aislamiento Seguro
+     * La anotación @Valid activa las restricciones @NotBlank y @Email de tu RequestDTO
+     */
     @PostMapping("/registrar")
-    public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+    public ResponseEntity<?> registrar(@Valid @RequestBody UsuarioRequestDTO requestDTO) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(usuarioService.registrar(usuario));
+            UsuarioResponseDTO respuesta = usuarioService.registrar(requestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            // Estructura el JSON de respuesta con la clave "mensaje" para que React lo lea directo
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensaje", e.getMessage()));
         }
     }
 
@@ -69,4 +82,3 @@ public class UsuarioController {
                 : ResponseEntity.notFound().build();
     }
 }
-
