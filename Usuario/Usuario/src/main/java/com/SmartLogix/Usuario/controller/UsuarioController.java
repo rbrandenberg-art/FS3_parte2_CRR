@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
-// IMPORTACIONES DE LOS DTOS NUEVOS Y VALIDACIÓN
 import com.SmartLogix.Usuario.dto.UsuarioRequestDTO;
 import com.SmartLogix.Usuario.dto.UsuarioResponseDTO;
 import com.SmartLogix.Usuario.model.Usuario;
@@ -27,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Permite la comunicación limpia con tu aplicación en React sin problemas de CORS
 public class UsuarioController {
 
     private final UsuarioService usuarioService;

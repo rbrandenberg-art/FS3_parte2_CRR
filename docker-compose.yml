@@ -1,0 +1,69 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:latest # Imagen ligera de Oracle ideal para desarrollo
+    container_name: oracle-db
+    environment:
+      - ORACLE_PASSWORD=AdminPassword123!
+    ports:
+      - "1521:1521"
+    volumes:
+      - ./init-db.sql:/container-entrypoint-initdb.d/init-db.sql
+    networks:
+      - smartlogix-network
+
+  api-gateway:
+    build: ./Api_Gateway/Api_Gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - smartlogix-network
+    depends_on:
+      - inventario-service
+      - pedido-service
+      - envio-service
+      - usuario-service
+
+  inventario-service:
+    build: ./Inventario/Inventario
+    container_name: inventario-service
+    ports:
+      - "8081:8081"
+    networks:
+      - smartlogix-network
+    depends_on:
+      - oracle-db
+
+  pedido-service:
+    build: ./Pedido/Pedido
+    container_name: pedido-service
+    ports:
+      - "8082:8082"
+    networks:
+      - smartlogix-network
+    depends_on:
+      - oracle-db
+
+  envio-service:
+    build: ./Envio/Envio
+    container_name: envio-service
+    ports:
+      - "8083:8083"
+    networks:
+      - smartlogix-network
+    depends_on:
+      - oracle-db
+
+  usuario-service:
+    build: ./Usuario/Usuario
+    container_name: usuario-service
+    ports:
+      - "8084:8084"
+    networks:
+      - smartlogix-network
+    depends_on:
+      - oracle-db
+
+networks:
+  smartlogix-network:
+    driver: bridge

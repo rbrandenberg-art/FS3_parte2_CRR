@@ -30,12 +30,11 @@ public class GatewayConfig {
             .route("inventario-route", r -> r
                 .path("/api/inventario/**")
                 .filters(f -> f
-                    // Agrega header de trazabilidad a cada request
                     .addRequestHeader("X-Gateway-Source", "ecommerce-gateway")
-                    // Agrega header de servicio al response
                     .addResponseHeader("X-Servicio", "inventario")
                 )
-                .uri("http://localhost:8081")
+                // ANTES: .uri("http://localhost:8081")
+                .uri("http://inventario-service:8081") 
             )
 
             // ── Pedido ───────────────────────────────────────────────────────
@@ -45,7 +44,8 @@ public class GatewayConfig {
                     .addRequestHeader("X-Gateway-Source", "ecommerce-gateway")
                     .addResponseHeader("X-Servicio", "pedido")
                 )
-                .uri("http://localhost:8082")
+                // ANTES: .uri("http://localhost:8082")
+                .uri("http://pedido-service:8082")
             )
 
             // ── Envíos ───────────────────────────────────────────────────────
@@ -55,7 +55,8 @@ public class GatewayConfig {
                     .addRequestHeader("X-Gateway-Source", "ecommerce-gateway")
                     .addResponseHeader("X-Servicio", "envios")
                 )
-                .uri("http://localhost:8083")
+                // ANTES: .uri("http://localhost:8083")
+                .uri("http://envio-service:8083")
             )
 
             // ── Usuario ──────────────────────────────────────────────────────
@@ -65,7 +66,8 @@ public class GatewayConfig {
                     .addRequestHeader("X-Gateway-Source", "ecommerce-gateway")
                     .addResponseHeader("X-Servicio", "usuario")
                 )
-                .uri("http://localhost:8084")
+                // ANTES: .uri("http://localhost:8084")
+                .uri("http://usuario-service:8084")
             )
 
         .build();
