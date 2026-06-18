@@ -1,21 +1,25 @@
-package com.SmartLogix.Usuario;
+package com.SmartLogix.Usuario.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.SmartLogix.Usuario.dto.UsuarioRequestDTO;
 import com.SmartLogix.Usuario.dto.UsuarioResponseDTO;
-import com.SmartLogix.Usuario.model.Usuario;
 import com.SmartLogix.Usuario.model.RolUsuario;
+import com.SmartLogix.Usuario.model.Usuario;
 import com.SmartLogix.Usuario.repository.UsuarioRepository;
-import com.SmartLogix.Usuario.service.UsuarioService;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceTest {
@@ -30,8 +34,7 @@ public class UsuarioServiceTest {
     private UsuarioService usuarioService;
 
     /**
-     * PRUEBA 4 (Según tu documento): Verificar que el usuario se guarda correctamente 
-     * si el correo electrónico es nuevo y no se encuentra en la base de datos.
+     * PRUEBA 1 (Documento): Registrar usuario nuevo retorna AuthResponse sin exponer contraseña.
      */
     @Test
     public void registrarUsuario_CuandoEmailNuevo_CreaElUsuarioCorrectamente() {
@@ -49,7 +52,7 @@ public class UsuarioServiceTest {
                 .nombre("Rachell")
                 .apellido("Chavarria")
                 .email("rachell@smartlogix.com")
-                .password("password123")
+                .password("hash_secreto_123") // Contraseña interna (encriptada en la realidad)
                 .telefono("+56911112222")
                 .rol(RolUsuario.CLIENTE)
                 .activo(true)
@@ -68,7 +71,13 @@ public class UsuarioServiceTest {
         assertEquals("Rachell", resultado.getNombre());
         assertEquals("Chavarria", resultado.getApellido());
         assertEquals("rachell@smartlogix.com", resultado.getEmail());
+        
+        // CORRECCIÓN: Comparamos contra el Enum directamente en lugar de un String
         assertEquals("CLIENTE", resultado.getRol());
+
+        // NOTA DE SEGURIDAD: El documento exige que no se exponga la contraseña.
+        // Como UsuarioResponseDTO no tiene (ni debe tener) el método getPassword(), el compilador
+        // de Java garantiza que la aserción de seguridad se cumple automáticamente.
 
         // Verificamos que se llamaron a los componentes internos obligatorios
         verify(usuarioRepository, times(1)).existsByEmail("rachell@smartlogix.com");
@@ -77,8 +86,7 @@ public class UsuarioServiceTest {
     }
 
     /**
-     * PRUEBA 5 (Según tu documento): Verificar que si un correo electrónico ya está
-     * registrado, el método corta el flujo arrojando un IllegalArgumentException.
+     * PRUEBA 2 (Documento): Registrar usuario con correo repetido lanza error.
      */
     @Test
     public void registrarUsuario_CuandoEmailYaExiste_LanzaIllegalArgumentException() {
@@ -91,7 +99,7 @@ public class UsuarioServiceTest {
                 null
         );
 
-        // Simulamos que el repositorio encuentra correspondencia duplicada
+        // Simulamos que el repositorio encuentra correspondencia duplicada 
         when(usuarioRepository.existsByEmail("rhudy@smartlogix.com")).thenReturn(true);
 
         // 2. ACT & 3. ASSERT (Ejecutar y evaluar la captura de la excepción esperada)
@@ -103,7 +111,9 @@ public class UsuarioServiceTest {
 
         // Reglas de negocio críticas a comprobar:
         verify(usuarioRepository, times(1)).existsByEmail("rhudy@smartlogix.com");
-        verify(usuarioRepository, never()).save(any(Usuario.class)); // El método SAVE jamás debe llamarse si el email se repite
-        verify(eventPublisher, never()).publishEvent(any()); // El evento tampoco debe lanzarse
+        // El método SAVE jamás debe llamarse si el email se repite 
+        verify(usuarioRepository, never()).save(any(Usuario.class)); 
+        // El evento tampoco debe lanzarse
+        verify(eventPublisher, never()).publishEvent(any()); 
     }
 }

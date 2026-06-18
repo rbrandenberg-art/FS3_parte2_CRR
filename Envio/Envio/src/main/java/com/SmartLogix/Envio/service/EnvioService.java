@@ -11,7 +11,6 @@ import com.SmartLogix.Envio.core.CalculadorLogistico;
 import com.SmartLogix.Envio.model.Envio;
 import com.SmartLogix.Envio.model.EstadoEnvio;
 import com.SmartLogix.Envio.repository.EnvioRepository;
-import com.SmartLogix.Envio.core.CalculadorLogistico; 
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,18 +37,23 @@ public class EnvioService {
     }
 
     public Envio crear(Envio envio, String tipoLogistica) {
+        // 1. VALIDACIÓN FAIL-FAST: Evitar que un pedido tenga más de un envío
+        if (envio.getPedidoId() != null && envioRepository.findByPedidoId(envio.getPedidoId()).isPresent()) {
+            throw new IllegalArgumentException("El pedido ya tiene un envío registrado");
+        }
+
         envio.setNumeroSeguimiento(generarNumeroSeguimiento());
 
-        // 1. Buscamos la estrategia que coincida con el tipo solicitado
+        // 2. Buscamos la estrategia que coincida con el tipo solicitado
         CalculadorLogistico estrategia = modalidadesDespacho.stream()
             .filter(m -> m.obtenerIdentificador().equalsIgnoreCase(tipoLogistica))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("La modalidad de despacho '" + tipoLogistica + "' no existe."));
 
-        // 2. Ejecutamos la lógica de la estrategia (esto reemplaza el plusDays(5))
+        // 3. Ejecutamos la lógica de la estrategia
         estrategia.procesarPlazos(envio);
 
-        // 3. Guardamos
+        // 4. Guardamos
         return envioRepository.save(envio);
     }
 
